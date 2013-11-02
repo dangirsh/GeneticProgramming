@@ -23,7 +23,7 @@ sortPop pop = snd . unzip . reverse . sort $ zip (map fitness pop) pop
 
 
 select :: Population -> IO Population
-select pop = return $ ((take k) . sortPop) pop
+select pop = return $ take k . sortPop $ pop
 
 
 combine :: [Solution] -> [Solution] -> Population
@@ -40,6 +40,5 @@ randomPair parents = do
 nextPop :: Population -> IO Population
 nextPop pop = do
     parents <- select pop
-    mates <- sequence $ replicate (n - k) (randomPair parents)
-    children <- mapM mate mates
+    children <- sequence $ replicate (n - k) (randomPair parents >>= mate)
     return $ combine parents children

@@ -11,7 +11,7 @@ import System.Random (randomRIO)
 type Allele = Int
 
 
-mutationSize = 0.1 :: Float
+-- mutationSize = 0.1 :: Float
 
 
 mutateAllele :: Allele -> IO Allele

@@ -9,7 +9,6 @@ module Common (
 
 import System.Random (randomRIO)
 
-
 randInt i = randomRIO (0, i - 1)
 
 randFloat f = randomRIO (0.0, f)

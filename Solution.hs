@@ -44,15 +44,12 @@ crossover p1 p2 = do
 mutate :: Solution -> IO Solution
 mutate solution = do
     i <- randInt m
-    let a = solution !! i
-    ma <- mutateAllele a
+    ma <- mutateAllele (solution !! i)
     return $ (take (i - 1) solution) ++ [ma] ++ (drop i solution)
 
 
 mate :: (Solution, Solution) -> IO Solution
-mate (p1, p2) = do
-    child <- crossover p1 p2
-    mutate child
+mate (p1, p2) = crossover p1 p2 >>= mutate
 
 
 randomSol :: IO Solution
