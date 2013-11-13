@@ -1,22 +1,26 @@
 module Main where
 
 
-import Common
-import Solution (Solution)
-import Population
+import Common (g)
+import Solution (Solution, fitness)
+import Population (Population, nextPop, sortPop, initPop)
 import System.Random (getStdGen, setStdGen)
 
 
-runGA :: Int -> Population -> IO Population
-runGA 0 pop = return pop
-runGA i pop = nextPop pop >>= runGA (i - 1)
+evolve :: Population -> IO Population
+evolve pop = f g pop
+    where
+        f 0 pop = return pop
+        f i pop = nextPop pop >>= f (i - 1)
 
 
 results :: IO Solution
-results = initPop >>= runGA g >>= return . head . sortPop
+results = initPop >>= evolve >>= return . head . sortPop
 
 
 main = do
     gen <- getStdGen
     setStdGen gen
-    results >>= print
+    r <- results
+    print r
+    print $ fitness r

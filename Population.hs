@@ -6,9 +6,9 @@ module Population (
 ) where
 
 
-import Common
-import Solution
-import Data.List (sort)
+import Common (n, k, randElem)
+import Solution (Solution, randomSol, cmpSol, mate)
+import Data.List (sortBy)
 
 
 type Population = [Solution]
@@ -19,9 +19,10 @@ initPop = sequence $ replicate n $ randomSol
 
 
 sortPop :: Population -> Population
-sortPop pop = snd . unzip . reverse . sort $ zip (map fitness pop) pop
+sortPop = reverse . sortBy cmpSol
 
 
+-- truncation selection
 select :: Population -> IO Population
 select pop = return $ take k . sortPop $ pop
 
