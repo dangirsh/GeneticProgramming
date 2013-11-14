@@ -3,39 +3,55 @@ module Common (
     randFloat,
     randElem,
     random,
+    average,
     g, n, m, selection_p, k, crossover_p, mutation_p
 ) where
 
 
 import System.Random (randomRIO)
+import Control.Monad (replicateM)
+import Data.List (genericLength)
 
 
+--returns a random integer between 0 and i-1, inclusive
 randInt :: Int -> IO Int
 randInt i = randomRIO (0, i - 1)
 
 
+-- returns a random float between 0 and 1
 randFloat :: Float -> IO Float
 randFloat f = randomRIO (0.0, f)
 
 
+-- returns a random element of l
 randElem :: [a] -> IO a
 randElem l = do
     i <- randInt $ length l
     return $ l !! i
 
 
+-- returns n random elements from l, possibly with duplicates
+randElems :: Int -> [a] -> IO [a]
+randElems 0 _ = return []
+randElems n l = replicateM n (randElem l)
+
+
 random :: IO Float
 random = randFloat 1.0 :: IO Float
 
 
+average :: Integral a => [a] -> a
+average l = div (sum l) (genericLength l)
+
+
 -- number of generations
-g = 200 :: Int
+g = 100 :: Int
 
 -- size of population
-n = 200 :: Int
+n = 100 :: Int
 
 -- size of solution
-m = 20 :: Int
+m = 50 :: Int
 
 -- fraction to select
 selection_p = 0.3 :: Float

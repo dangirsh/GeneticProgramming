@@ -2,14 +2,16 @@ module Population (
     Population,
     initPop,
     sortPop,
-    nextPop
+    nextPop,
+    diversity
 ) where
 
 
 import Common (n, k, randElem)
-import Solution (Solution, randomSol, cmpSol, mate)
+import Solution (Solution, randomSol, cmpSol, mate, hashSol)
 import Data.List (sortBy)
 import Control.Monad (replicateM)
+import Data.Set (fromList, size)
 
 type Population = [Solution]
 
@@ -19,7 +21,7 @@ initPop = replicateM n randomSol
 
 
 sortPop :: Population -> Population
-sortPop = reverse . sortBy cmpSol
+sortPop = sortBy $ flip cmpSol
 
 
 -- truncation selection
@@ -43,3 +45,8 @@ nextPop pop = do
     parents <- select pop
     children <- replicateM (n - k) (randomPair parents >>= mate)
     return $ combine parents children
+
+
+-- fraction of unique solutions in pop
+diversity :: Population -> Float
+diversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
