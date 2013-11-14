@@ -8,7 +8,7 @@ import System.Random (getStdGen, setStdGen)
 
 
 evolve :: Population -> IO Population
-evolve pop = f g pop
+evolve = f g
     where
         f 0 pop = return pop
         f i pop = nextPop pop >>= f (i - 1)
@@ -18,6 +18,7 @@ results :: IO Solution
 results = initPop >>= evolve >>= return . head . sortPop
 
 
+main :: IO ()
 main = do
     gen <- getStdGen
     setStdGen gen

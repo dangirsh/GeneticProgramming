@@ -11,6 +11,8 @@ module Solution (
 import Common (m, randInt, randElem)
 import Allele (Allele, Stack, Term(Term), mutateAllele, randAllele, input, output, stackFunc, name)
 import Control.Monad (replicateM)
+import Foreign.Marshal.Utils (fromBool)
+
 
 type Solution = [Allele]
 
@@ -20,22 +22,13 @@ type Fitness = Int
 
 -- RS
 randomSol :: IO Solution
-randomSol = sequence $ replicate m randAllele
+randomSol = replicateM m randAllele
 
 
--- RS
---fitness :: Solution -> Fitness
---fitness solution = let (a, _) = foldl countInOrder (0, -1) solution in a
---    where
---        countInOrder (count, last) next
---            | next > last = (count + 1, next)
---            | otherwise = (count - 1, next)
-
-
--- compileSol [t1, t2, t3] --> f1 . f2 . f3
-compileSol :: Solution -> (Stack -> Stack)
-compileSol [] = id
-compileSol sol = foldl (.) id $ map stackFunc sol
+-- idea: [t1, t2, t3] --> f1 . f2 . f3
+evalSol :: Solution -> Stack -> Maybe Stack
+evalSol [] input = Just input
+evalSol (x:xs) input = stackFunc x input >>= evalSol xs
 
 
 evenParity :: [Bool] -> Bool
@@ -50,12 +43,15 @@ fitness = _fitness 10 5
 _fitness i l sol = sum $ map counter inputs
     where
         inputs = take i $ replicateM l [True, False]
-        eval = compileSol sol
-        counter input = if (head (eval input) == evenParity input) then 1 else 0
+        counter input = case evalSol sol input of
+            Nothing     -> -1
+            Just []     -> error "Logic error - should never happen!"
+            Just (x:xs) -> fromBool $ x == evenParity input
 
--- return indecies of terms in sol that have inp inputs and out ouputs
+
+-- return indicies of terms in sol that have inp inputs and out ouputs
 splits :: Int -> Int -> Solution -> [Int]
-splits inp out sol = map fst $ filter matches $ zip [0..((length sol) - 1)] sol
+splits inp out sol = map fst $ filter matches $ zip [0..(length sol - 1)] sol
     where
         matches (_, Term {input = i, output = o, stackFunc = _, name = _}) =
             i == inp && o == out
@@ -69,7 +65,7 @@ crossover p1 p2 = do
     let x = last a   -- deal with small m case later
     case splits (input x) (output x) p2 of
         [] -> return p1
-        xs -> (randElem xs) >>= \j -> return $ a ++ (snd $ splitAt j p2)
+        xs -> randElem xs >>= \j -> return $ a ++ snd (splitAt j p2)
 
 
 -- RS

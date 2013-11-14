@@ -29,13 +29,13 @@ random = randFloat 1.0 :: IO Float
 
 
 -- number of generations
-g = 100 :: Int
+g = 200 :: Int
 
 -- size of population
-n = 100 :: Int
+n = 200 :: Int
 
 -- size of solution
-m = 10 :: Int
+m = 20 :: Int
 
 -- fraction to select
 selection_p = 0.3 :: Float

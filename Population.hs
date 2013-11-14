@@ -9,13 +9,13 @@ module Population (
 import Common (n, k, randElem)
 import Solution (Solution, randomSol, cmpSol, mate)
 import Data.List (sortBy)
-
+import Control.Monad (replicateM)
 
 type Population = [Solution]
 
 
 initPop :: IO Population
-initPop = sequence $ replicate n $ randomSol
+initPop = replicateM n randomSol
 
 
 sortPop :: Population -> Population
@@ -41,5 +41,5 @@ randomPair parents = do
 nextPop :: Population -> IO Population
 nextPop pop = do
     parents <- select pop
-    children <- sequence $ replicate (n - k) (randomPair parents >>= mate)
+    children <- replicateM (n - k) (randomPair parents >>= mate)
     return $ combine parents children

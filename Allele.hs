@@ -22,7 +22,7 @@ type Stack = [Bool]
 
 data Term = Term { input :: Int,
                    output :: Int,
-                   stackFunc :: (Stack -> Stack),
+                   stackFunc :: (Stack -> Maybe Stack),
                    name :: String
                  }
 
@@ -34,19 +34,23 @@ instance Show Term where
 type Allele = Term
 
 
-trueFunc = (True:)
+trueFunc :: Stack -> Maybe Stack
+trueFunc xs = Just (True:xs)
 
 
-falseFunc = (False:)
+falseFunc :: Stack -> Maybe Stack
+falseFunc xs = Just (False:xs)
 
 
-andFunc [] = [True] --error "bleh"
-andFunc (x:[]) = [True] -- error "bleh2"
-andFunc (x1:x2:xs) = (x1 && x2):xs
+andFunc :: Stack -> Maybe Stack
+andFunc [] = Nothing
+andFunc (x:[]) = Nothing
+andFunc (x1:x2:xs) = Just ((x1 && x2):xs)
 
 
-notFunc [] = [True] --error "wheeh"
-notFunc (x:xs) = (not x):xs
+notFunc :: Stack -> Maybe Stack
+notFunc [] = Nothing
+notFunc (x:xs) = Just ((not x):xs)
 
 
 trueTerm = Term { input = 0, output = 1, stackFunc = trueFunc, name = "true"}
