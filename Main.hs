@@ -48,4 +48,3 @@ main = do
     setStdGen gen
     r <- results
     print r
-    print $ fitness r
