@@ -9,7 +9,7 @@ module Solution (
 ) where
 
 
-import Common (m, randInt, randElem)
+import Common (m, randInt, randElem, random, crossover_p)
 import Allele (Allele, Stack, Term(Term), mutateAllele, randAllele, input, output, stackFunc, name)
 import Control.Monad (replicateM)
 import Control.Applicative ((<$>))
@@ -38,15 +38,15 @@ evenParity = even . sum . map (\b -> if b then 1 else 0)
 
 
 fitness :: Solution -> Fitness
-fitness = _fitness 3
+fitness = _fitness evenParity 6
 -- # of times it gets even parity correct for inputs of length l
-_fitness l sol = sum $ map counter inputs
+_fitness f l sol = sum $ map counter inputs
     where
         inputs = replicateM l [True, False]
         counter input = case evalSol sol input of
-            Nothing     -> -1
+            Nothing     -> 0
             Just []     -> error "Logic error - should never happen!"
-            Just (x:xs) -> fromBool $ x == evenParity input
+            Just (x:xs) -> fromBool $ x == f input
 
 
 -- return indicies of terms in sol that have inp inputs and out ouputs
@@ -79,22 +79,35 @@ crossover p1 p2 =
             xs -> randElem xs >>= \j -> return $ a ++ snd (splitAt j p2)
 
 
+safeTail [] = []
+safeTail xs = tail xs
+
 -- RS
 mutate :: Solution -> IO Solution
 mutate solution = do
     let l = length solution
-    i <- randInt (l - 1)
+    i <- randInt (l - 2)
     ma <- mutateAllele (solution !! i)
-    let (xs, _:ys) = splitAt i solution
-    return $ xs ++ [ma] ++ ys
+    let (xs, ys) = splitAt i solution
+    return $ xs ++ [ma] ++ safeTail ys
 
 
 mate :: (Solution, Solution) -> IO Solution
-mate (p1, p2) = reduce <$> crossover p1 p2 -- >>= mutate
+mate (p1, p2) = do
+    r <- random
+    if r < crossover_p then --FIXME
+        reduce <$> crossover p1 p2 >>= mutate
+    else
+        randomSol
 
 
 cmpSol :: Solution -> Solution -> Ordering
-cmpSol s1 s2 = compare (fitness s1) (fitness s2)
+cmpSol s1 s2 =
+    let c = compare (fitness s1) (fitness s2) in
+    if c == EQ then
+        compare (length s2) (length s1)
+    else
+        c
 
 
 hashSol :: Solution -> Int

@@ -9,7 +9,8 @@ module Allele (
     output,
     name,
     notTerm,
-    andTerm
+    andTerm,
+    orTerm
 ) where
 
 
@@ -42,10 +43,34 @@ falseFunc :: Stack -> Maybe Stack
 falseFunc xs = Just (False:xs)
 
 
+binFunc :: (Bool -> Bool -> Bool) -> Stack -> Maybe Stack
+binFunc _ [] = Nothing
+binFunc _ (x:[]) = Nothing
+binFunc f (x1:x2:xs) = Just ((f x1 x2):xs)
+
+
 andFunc :: Stack -> Maybe Stack
-andFunc [] = Nothing
-andFunc (x:[]) = Nothing
-andFunc (x1:x2:xs) = Just ((x1 && x2):xs)
+andFunc = binFunc (&&)
+
+
+orFunc :: Stack -> Maybe Stack
+orFunc = binFunc (||)
+
+
+xorFunc :: Stack -> Maybe Stack
+xorFunc = binFunc xor
+    where
+        xor True False = True
+        xor False True = True
+        xor _ _ = False
+
+
+norFunc :: Stack -> Maybe Stack
+norFunc = binFunc (\a -> \b -> not (a || b))
+
+
+nandFunc :: Stack -> Maybe Stack
+nandFunc = binFunc (\a -> \b -> not (a && b))
 
 
 notFunc :: Stack -> Maybe Stack
@@ -56,22 +81,18 @@ notFunc (x:xs) = Just ((not x):xs)
 trueTerm = Term { input = 0, output = 1, stackFunc = trueFunc, name = "true"}
 falseTerm = Term { input = 0, output = 1, stackFunc = falseFunc, name = "false"}
 andTerm = Term { input = 2, output = 1, stackFunc = andFunc, name = "and"}
+nandTerm = Term { input = 2, output = 1, stackFunc = nandFunc, name = "nand"}
+orTerm = Term { input = 2, output = 1, stackFunc = orFunc, name = "or"}
+norTerm = Term { input = 2, output = 1, stackFunc = norFunc, name = "nor"}
+xorTerm = Term { input = 2, output = 1, stackFunc = xorFunc, name = "xor"}
 notTerm = Term { input = 1, output = 1, stackFunc = notFunc, name = "not"}
 
 
 randAllele :: IO Allele
-randAllele = randElem [trueTerm, falseTerm, andTerm, notTerm]
+randAllele = randElem [andTerm, orTerm, nandTerm, norTerm, notTerm, xorTerm]
+--randAllele = randElem [andTerm, orTerm, nandTerm, norTerm, notTerm]
+--randAllele = randElem [notTerm, xorTerm]
 
-
--- mutationSize = 0.1 :: Float
-
-
--- RS
---mutateAllele :: Allele -> IO Allele
---mutateAllele a = do
---    p <- random
---    x <- randomRIO (-1, 1)
---    return $ if p < mutation_p then a + x else a
 
 mutateAllele :: Allele -> IO Allele
-mutateAllele a = return a
+mutateAllele a = randAllele

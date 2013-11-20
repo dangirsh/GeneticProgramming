@@ -4,6 +4,8 @@ module Common (
     randElem,
     random,
     average,
+    intAverage,
+    every,
     g, n, m, selection_p, k, crossover_p, mutation_p
 ) where
 
@@ -18,7 +20,7 @@ randInt :: Int -> IO Int
 randInt i = randomRIO (0, i - 1)
 
 
--- returns a random float between 0 and 1
+-- returns a random float between 0 and f
 randFloat :: Float -> IO Float
 randFloat f = randomRIO (0.0, f)
 
@@ -40,27 +42,37 @@ random :: IO Float
 random = randFloat 1.0 :: IO Float
 
 
-average :: Integral a => [a] -> a
-average l = div (sum l) (genericLength l)
+average :: Fractional a => [a] -> a
+average l = (sum l) / (genericLength l)
+
+
+intAverage :: Integral a => Fractional b => [a] -> b
+intAverage = average . map fromIntegral
+
+
+every :: Int -> [a] -> [a]
+every n xs = case drop (n-1) xs of
+              (y:ys) -> y : every n ys
+              [] -> []
 
 
 -- number of generations
 g = 100 :: Int
 
 -- size of population
-n = 100 :: Int
+n = 20 :: Int
 
 -- size of solution
-m = 50 :: Int
+m = 10 :: Int
 
 -- fraction to select
-selection_p = 0.3 :: Float
+selection_p = 0.50 :: Float
 
 -- number to select
 k = round $ (fromIntegral n) * selection_p :: Int
 
 -- probability of crossover
-crossover_p = 0.9 :: Float
+crossover_p = 0.5 :: Float
 
 -- probability of mutation
-mutation_p = 0.1 :: Float
+mutation_p = 0.2 :: Float
