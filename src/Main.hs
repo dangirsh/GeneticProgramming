@@ -15,18 +15,18 @@ topSol = head . sortPop
 
 -- TODO: maybe make a Stats type + lenses
 getStats :: Population -> [Double]
-getStats pop = map (($ pop)) [(fromIntegral . fitness . topSol)
-                             ,(intAverage . map fitness)
-                             ,(intAverage . map length)
-                             ,diversity
-                             ]
+getStats pop = map ($ pop) [fromIntegral . fitness . topSol
+                            ,intAverage . map fitness
+                            ,intAverage . map length
+                            ,diversity
+                           ]
 
 
 evolve :: Int -> Population -> WriterT [[Double]] IO Population
 evolve 0 pop = return pop
 evolve i pop = do
-            tell $ [fromIntegral (g - i + 1) : getStats pop]
-            (lift $ nextPop pop) >>= evolve (i - 1)
+            tell [fromIntegral (g - i + 1) : getStats pop]
+            lift (nextPop pop) >>= evolve (i - 1)
 
 
 writeStats :: ([[Double]], Int) -> IO ()

@@ -53,7 +53,7 @@ random = randDouble 1.0 :: IO Double
 
 
 average :: Fractional a => [a] -> a
-average l = (sum l) / (genericLength l)
+average l = sum l / genericLength l
 
 
 intAverage :: Integral a => Fractional b => [a] -> b
@@ -68,7 +68,7 @@ every xs i = case drop (i-1) xs of
 
 -- number of generations
 g :: Int
-g = 100
+g = 200
 
 -- size of population
 n :: Int
@@ -76,7 +76,7 @@ n = 100
 
 -- size of solution
 m :: Int
-m = 50
+m = 100
 
 -- fraction to select
 selection_p :: Double

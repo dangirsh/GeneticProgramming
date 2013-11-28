@@ -18,4 +18,4 @@ cabal-version:       >=1.8
 executable GeneticProgramming
    main-is: Main.hs
   -- other-modules:
-  build-depends:       base ==4.6.*, random ==1.0.*
+  build-depends:       base ==4.6.*, random ==1.0.*, lens, chart

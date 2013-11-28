@@ -23,7 +23,7 @@ type Stack = [Bool]
 
 data Term = Term { input :: Int,
                    output :: Int,
-                   stackFunc :: (Stack -> Maybe Stack),
+                   stackFunc :: Stack -> Maybe Stack,
                    name :: String
                  }
 
@@ -46,7 +46,7 @@ falseFunc xs = Just (False:xs)
 binFunc :: (Bool -> Bool -> Bool) -> Stack -> Maybe Stack
 binFunc _ [] = Nothing
 binFunc _ (x:[]) = Nothing
-binFunc f (x1:x2:xs) = Just ((f x1 x2):xs)
+binFunc f (x1:x2:xs) = Just (f x1 x2:xs)
 
 
 andFunc :: Stack -> Maybe Stack
@@ -66,16 +66,16 @@ xorFunc = binFunc xor
 
 
 norFunc :: Stack -> Maybe Stack
-norFunc = binFunc (\a -> \b -> not (a || b))
+norFunc = binFunc (\a b -> not (a || b))
 
 
 nandFunc :: Stack -> Maybe Stack
-nandFunc = binFunc (\a -> \b -> not (a && b))
+nandFunc = binFunc (\a b -> not (a && b))
 
 
 notFunc :: Stack -> Maybe Stack
 notFunc [] = Nothing
-notFunc (x:xs) = Just ((not x):xs)
+notFunc (x:xs) = Just (not x:xs)
 
 
 trueTerm = Term { input = 0, output = 1, stackFunc = trueFunc, name = "true"}

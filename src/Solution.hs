@@ -38,7 +38,7 @@ evenParity = even . sum . map (\b -> if b then 1 else 0)
 
 
 fitness :: Solution -> Fitness
-fitness = _fitness evenParity 6
+fitness = _fitness evenParity 7
 -- # of times it gets even parity correct for inputs of length l
 _fitness f l sol = sum $ map counter inputs
     where
@@ -63,7 +63,7 @@ reduce (x:[]) = [x]
 reduce (x1:x2:xs) =
     case (name x1, name x2) of
         ("not", "not") -> reduce xs
-        otherwise      -> x1:x2:(reduce xs)
+        otherwise      -> x1:x2:reduce xs
 
 
 -- RS
@@ -111,4 +111,4 @@ cmpSol s1 s2 =
 
 
 hashSol :: Solution -> Int
-hashSol = hash . concat . map name
+hashSol = hash . concatMap name

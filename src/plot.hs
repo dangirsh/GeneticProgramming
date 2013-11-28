@@ -18,4 +18,7 @@ plot title xlabel ylabel fname xs ys = renderableToFile def (C.toRenderable layo
         p = C.plot_lines_values .~ [zip xs ys] $ def
 
 
-main = plot "T" "x" "y" "../plots/out.png" [1,2,3,4] [4,3,2,10]
+main :: IO ()
+main = do
+    _ <- plot "T" "x" "y" "../plots/test.png" [1,2,3,4] [4,3,2,10]
+    return ()
