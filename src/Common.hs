@@ -68,7 +68,7 @@ every xs i = case drop (i-1) xs of
 
 -- number of generations
 g :: Int
-g = 200
+g = 100
 
 -- size of population
 n :: Int
@@ -95,8 +95,10 @@ mutation_p :: Double
 mutation_p = 0.2 :: Double
 
 
-plot :: String -> String -> String -> String -> [Double] -> [Double] -> IO (PickFn ())
-plot title xlabel ylabel fname xs ys = renderableToFile def (C.toRenderable layout) fname
+plot :: PlotValue a => PlotValue b => String -> String -> String -> String -> [a] -> [b] -> IO ()
+plot title xlabel ylabel fname xs ys = do
+    _ <- renderableToFile def (C.toRenderable layout) fname
+    return ()
     where
         layout = C.layout_plots .~ [C.toPlot p]
                 $ C.layout_title .~ title

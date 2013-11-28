@@ -3,7 +3,7 @@ module Population (
     initPop,
     sortPop,
     nextPop,
-    diversity
+    getDiversity
 ) where
 
 
@@ -49,5 +49,5 @@ nextPop pop = do
 
 
 -- fraction of unique solutions in pop
-diversity :: Population -> Double
-diversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
+getDiversity :: Population -> Double
+getDiversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
