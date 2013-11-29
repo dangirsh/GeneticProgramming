@@ -1,18 +1,19 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 
 module Main where
 
 
 import Common (g, n, intAverage, every, plot)
-import Solution (Solution, fitness, randomSol)
-import Population (Population, nextPop, sortPop, initPop, getDiversity)
+import Solution (Solution, fitness)
+import Solution.ConcatSolution (ConcatSolution)
+import Population (nextPop, sortPop, initPop, getDiversity)
 import System.Random (getStdGen, setStdGen)
 import Control.Monad.Writer (WriterT, tell, runWriterT)
 import Control.Monad.Trans (lift)
 import Control.Applicative ((<$>))
 
-topSol :: Population -> Solution
+
+--topSol :: Solution a => Population -> a
+topSol :: [ConcatSolution] -> ConcatSolution
 topSol = head . sortPop
 
 
@@ -29,7 +30,7 @@ data PopStats =
 type GenStats = [PopStats]
 
 
-getPopStats :: Population -> Int -> PopStats
+getPopStats :: [ConcatSolution] -> Int -> PopStats
 getPopStats pop i =
     PopStats {
          psGeneration = i
@@ -40,7 +41,7 @@ getPopStats pop i =
     }
 
 
-evolve :: Int -> Population -> WriterT GenStats IO Population
+evolve :: Int -> [ConcatSolution] -> WriterT GenStats IO [ConcatSolution]
 evolve 0 pop = return pop
 evolve i pop = do
             tell [getPopStats pop (g - i + 1)]

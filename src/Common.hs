@@ -68,15 +68,15 @@ every xs i = case drop (i-1) xs of
 
 -- number of generations
 g :: Int
-g = 100
+g = 10
 
 -- size of population
 n :: Int
-n = 100
+n = 10
 
 -- size of solution
 m :: Int
-m = 100
+m = 10
 
 -- fraction to select
 selection_p :: Double

@@ -1,5 +1,7 @@
+{-# LANGUAGE GADTs #-}
+
+
 module Population (
-    Population,
     initPop,
     sortPop,
     nextPop,
@@ -14,34 +16,31 @@ import Control.Monad (replicateM)
 import Data.Set (fromList, size)
 
 
-type Population = [Solution]
-
-
-initPop :: IO Population
+initPop :: Solution a => IO [a]
 initPop = replicateM n randomSol
 
 
-sortPop :: Population -> Population
+sortPop :: Solution a => [a] -> [a]
 sortPop = sortBy $ flip cmpSol
 
 
 -- truncation selection
-select :: Population -> IO Population
+select :: Solution a => [a] -> IO [a]
 select pop = return $ take k . sortPop $ pop
 
 
-combine :: [Solution] -> [Solution] -> Population
+combine :: Solution a => [a] -> [a] -> [a]
 combine parents children = parents ++ children
 
 
-randomPair :: [Solution] -> IO (Solution, Solution)
+randomPair :: [a] -> IO (a, a)
 randomPair parents = do
     p1 <- randElem parents
     p2 <- randElem parents
     return (p1, p2)
 
 
-nextPop :: Population -> IO Population
+nextPop :: Solution a => [a] -> IO [a]
 nextPop pop = do
     parents <- select pop
     children <- replicateM (n - k) (randomPair parents >>= mate)
@@ -49,5 +48,5 @@ nextPop pop = do
 
 
 -- fraction of unique solutions in pop
-getDiversity :: Population -> Double
+getDiversity :: Solution a => [a] -> Double
 getDiversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
