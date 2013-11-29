@@ -4,6 +4,7 @@ module Solution (
     randomSol,
     fitness,
     mate,
+    sizeSol,
     cmpSol,
     hashSol
 ) where
@@ -16,5 +17,6 @@ class Solution sol where
     randomSol :: IO sol
     fitness :: sol -> Fitness
     mate :: (sol, sol) -> IO sol
+    sizeSol :: sol -> Int
     cmpSol :: sol -> sol -> Ordering
     hashSol :: sol -> Int

@@ -6,7 +6,7 @@ module Solution.ConcatSolution (
 ) where
 
 
-import Solution (Solution, Fitness, randomSol, fitness, mate, cmpSol, hashSol)
+import Solution (Solution, Fitness, randomSol, fitness, sizeSol, mate, cmpSol, hashSol)
 import Common (m, randInt, randElem, random, crossover_p)
 import Allele (Allele, Stack, Term(Term), mutateAllele, randAllele, input, output, stackFunc, name)
 import Control.Monad (replicateM)
@@ -30,6 +30,8 @@ instance Solution ConcatSolution where
             reduce <$> crossover p1 p2 >>= mutate
         else
             randomSol
+
+    sizeSol = length
 
     cmpSol s1 s2 =
         let c = compare (fitness s1) (fitness s2) in

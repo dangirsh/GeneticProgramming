@@ -3,7 +3,7 @@ module Main where
 
 
 import Common (g, n, intAverage, every, plot)
-import Solution (Solution, fitness)
+import Solution (Solution, fitness, sizeSol)
 import Solution.ConcatSolution (ConcatSolution)
 import Population (nextPop, sortPop, initPop, getDiversity)
 import System.Random (getStdGen, setStdGen)
@@ -12,8 +12,7 @@ import Control.Monad.Trans (lift)
 import Control.Applicative ((<$>))
 
 
---topSol :: Solution a => Population -> a
-topSol :: [ConcatSolution] -> ConcatSolution
+topSol :: Solution a => [a] -> a
 topSol = head . sortPop
 
 
@@ -22,7 +21,7 @@ data PopStats =
          psGeneration::Int
         ,psFitness::Double
         ,psAvFitness::Double
-        ,psAvSolLength::Double
+        ,psAvSolSize::Double
         ,psDiversity::Double
     } deriving Show
 
@@ -30,18 +29,18 @@ data PopStats =
 type GenStats = [PopStats]
 
 
-getPopStats :: [ConcatSolution] -> Int -> PopStats
+getPopStats :: Solution a => [a] -> Int -> PopStats
 getPopStats pop i =
     PopStats {
          psGeneration = i
         ,psFitness = fromIntegral . fitness . topSol $ pop
         ,psAvFitness = intAverage . map fitness $ pop
-        ,psAvSolLength =intAverage . map length $ pop
+        ,psAvSolSize =intAverage . map sizeSol $ pop
         ,psDiversity = getDiversity pop
     }
 
 
-evolve :: Int -> [ConcatSolution] -> WriterT GenStats IO [ConcatSolution]
+evolve :: Solution a => Int -> [a] -> WriterT GenStats IO [a]
 evolve 0 pop = return pop
 evolve i pop = do
             tell [getPopStats pop (g - i + 1)]
@@ -60,10 +59,16 @@ plotFitness genStats = plot title xlabel ylabel ("../plots/" ++ fname) xs ys
         ys = map psFitness genStats
 
 
+runGP :: Solution a => Show a => [a] -> IO ()
+runGP startPop = do
+    (endPop, genStats) <- (runWriterT . evolve g) startPop
+    writeStats (genStats, 10)
+    print $ topSol endPop
+    plotFitness genStats
+
+
 main :: IO ()
 main = do
     _ <- setStdGen <$> getStdGen
-    (pop, genStats) <- initPop >>= (runWriterT . evolve g)
-    writeStats (genStats, 10)
-    print $ topSol pop
-    plotFitness genStats
+    concatStartPop <- (initPop :: IO [ConcatSolution])
+    runGP concatStartPop
