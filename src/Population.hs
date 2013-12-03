@@ -1,46 +1,41 @@
-{-# LANGUAGE GADTs #-}
+module Population where
 
 
-module Population (
-    initPop,
-    sortPop,
-    nextPop,
-    getDiversity
-) where
-
-
-import Common (n, k, randElem)
-import Solution (Solution, randomSol, cmpSol, mate, hashSol)
+import Common (n, k, randomElem)
+import Solution (Solution, randomSol, cmpSol, mate)
 import Data.List (sortBy)
 import Control.Monad (replicateM)
 import Data.Set (fromList, size)
 
 
-initPop :: Solution a => IO [a]
+type Population a = [a]
+
+
+initPop :: Solution a => IO (Population a)
 initPop = replicateM n randomSol
 
 
-sortPop :: Solution a => [a] -> [a]
+sortPop :: Solution a => Population a -> Population a
 sortPop = sortBy $ flip cmpSol
 
 
 -- truncation selection
-select :: Solution a => [a] -> IO [a]
+select :: Solution a => Population a -> IO (Population a)
 select pop = return $ take k . sortPop $ pop
 
 
-combine :: Solution a => [a] -> [a] -> [a]
+combine :: Population a -> Population a -> Population a
 combine parents children = parents ++ children
 
 
-randomPair :: [a] -> IO (a, a)
+randomPair :: Population a -> IO (a, a)
 randomPair parents = do
-    p1 <- randElem parents
-    p2 <- randElem parents
+    p1 <- randomElem parents
+    p2 <- randomElem parents
     return (p1, p2)
 
 
-nextPop :: Solution a => [a] -> IO [a]
+nextPop :: Solution a => Population a -> IO (Population a)
 nextPop pop = do
     parents <- select pop
     children <- replicateM (n - k) (randomPair parents >>= mate)
@@ -48,5 +43,5 @@ nextPop pop = do
 
 
 -- fraction of unique solutions in pop
-getDiversity :: Solution a => [a] -> Double
-getDiversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
+--getDiversity :: Population a -> Double
+--getDiversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)

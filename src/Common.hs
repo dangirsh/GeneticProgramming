@@ -1,19 +1,9 @@
-module Common (
-    randInt,
-    randDouble,
-    randElem,
-    random,
-    average,
-    intAverage,
-    every,
-    plot,
-    g, n, m, selection_p, k, crossover_p, mutation_p
-) where
-
+module Common where
 
 import System.Random (randomRIO)
 import Control.Monad (replicateM)
 import Data.List (genericLength)
+import Foreign.Marshal.Utils (fromBool)
 
 -- imports for plot
 import Graphics.Rendering.Chart as C
@@ -26,8 +16,8 @@ import Control.Lens ((.~))
 
 
 --returns a random integer between 0 and i-1, inclusive
-randInt :: Int -> IO Int
-randInt i = randomRIO (0, i - 1)
+randomInt :: Int -> IO Int
+randomInt i = randomRIO (0, i - 1)
 
 
 -- returns a random Double between 0 and f
@@ -36,16 +26,16 @@ randDouble f = randomRIO (0.0, f)
 
 
 -- returns a random element of l
-randElem :: [a] -> IO a
-randElem l = do
-    i <- randInt $ length l
+randomElem :: [a] -> IO a
+randomElem l = do
+    i <- randomInt $ length l
     return $ l !! i
 
 
 -- returns i random elements from l, possibly with duplicates
-randElems :: Int -> [a] -> IO [a]
--- randElems 0 _ = return []
-randElems i l = replicateM i (randElem l)
+randomElems :: Int -> [a] -> IO [a]
+-- randomElems 0 _ = return []
+randomElems i l = replicateM i (randomElem l)
 
 
 random :: IO Double
@@ -68,15 +58,15 @@ every xs i = case drop (i-1) xs of
 
 -- number of generations
 g :: Int
-g = 10
+g = 50
 
 -- size of population
 n :: Int
-n = 10
+n = 50
 
 -- size of solution
 m :: Int
-m = 10
+m = 50
 
 -- fraction to select
 selection_p :: Double
@@ -93,6 +83,28 @@ crossover_p = 0.5
 -- probability of mutation
 mutation_p :: Double
 mutation_p = 0.2 :: Double
+
+
+type ValueType = Bool
+
+
+type InputType = [ValueType]
+
+
+trueSolution :: InputType -> ValueType
+trueSolution = even . sum . map fromBool
+
+
+numInputs :: Int
+numInputs = 4
+
+
+inputs :: [InputType]
+inputs = replicateM numInputs [True, False]
+
+
+class Compatible a where
+    compatible :: a -> a -> Bool
 
 
 plot :: PlotValue a => PlotValue b => String -> String -> String -> String -> [a] -> [b] -> IO ()

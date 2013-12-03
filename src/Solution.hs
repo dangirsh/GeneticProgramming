@@ -1,22 +1,14 @@
-module Solution (
-    Solution,
-    Fitness,
-    randomSol,
-    fitness,
-    mate,
-    sizeSol,
-    cmpSol,
-    hashSol
-) where
+module Solution where
 
+import Common
 
 type Fitness = Int
 
 
-class Solution sol where
-    randomSol :: IO sol
-    fitness :: sol -> Fitness
-    mate :: (sol, sol) -> IO sol
-    sizeSol :: sol -> Int
-    cmpSol :: sol -> sol -> Ordering
-    hashSol :: sol -> Int
+class (Show s, Eq s, Compatible s) => Solution s where
+    randomSol :: IO s
+    fitness :: s -> Fitness
+    mate :: (s, s) -> IO s
+    sizeSol :: s -> Int
+    cmpSol :: s -> s -> Ordering
+
