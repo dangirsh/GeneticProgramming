@@ -1,41 +1,26 @@
 module Tree where
 
 
-import Common
---import Data.Functor (Functor, fmap)
+import Common (random, randomElem)
 import Control.Monad (replicateM)
 import Control.Applicative (pure, (<$>), (<*>))
 import Prelude hiding (foldr, mapM)
 import Data.Foldable (Foldable, foldMap, foldr)
---import Data.Traversable (Traversable, traverse, mapM)
 import Data.Monoid ((<>))
 
 
 data Tree a = Node a [Tree a] deriving Eq
 
 
-instance (Show a) => Show (Tree a) where
+instance Show a => Show (Tree a) where
     show = f 0
         where
             f i (Node x xs) = indent i ++ show x ++ "\n" ++ concatMap (f (i + 1)) xs
             indent i = concat (replicate i "  ")
 
 
---instance Functor Tree where
---    fmap f (Node x xs) = Node (f x) (fmap (fmap f) xs)
-
-
---instance Traversable Tree where
---    traverse f (Node x xs) = Node <$> f x <*> traverse (traverse f) xs
-
-
 instance Foldable Tree where
     foldMap f (Node x xs) = f x <> foldMap (foldMap f) xs
-
-
-instance (Compatible a) => Compatible (Tree a) where
-    compatible (Node x1 xs1) (Node x2 xs2) =
-        (compatible x1 x2) && (length xs1 == length xs2)
 
 
 randomTree :: [a] -> [a] -> (a -> Int) -> Int -> IO (Tree a)
@@ -59,7 +44,7 @@ swapSubtree node newNode this@(Node x xs) =
 
 
 toList :: Tree a -> [a]
-toList (Node x xs) =  x : concatMap toList xs
+toList = foldr (:) []
 
 
 toNodeList :: Tree a -> [Tree a]

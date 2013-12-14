@@ -1,73 +1,58 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Main where
 
 
-import Common (g, n, intAverage, every, plot)
-import Solution (Solution, fitness, sizeSol)
+import Common
+import GP (evolve)
+import Stats (RunStats, plotStats)
+import Solution (Solution, fitness, sizeSol, randomSol)
 import Solution.TreeSolution (TreeSolution)
-import Population (Population, nextPop, sortPop, initPop)
-import System.Random (getStdGen, setStdGen)
-import Control.Monad.Writer (WriterT, tell, runWriterT)
-import Control.Monad.Trans (lift)
+import Solution.ConcatSolution (ConcatSolution)
+import Population (Population, initPop, sortPop)
+
+
+import System.Random (getStdGen, setStdGen, mkStdGen)
+import Control.Monad (forM)
+import Control.Monad.Writer (WriterT, runWriterT)
 import Control.Applicative ((<$>))
 
 
-topSol :: Solution a => Population a -> a
-topSol = head . sortPop
+--runRS :: Solution r t => IO ([r t], [Double])
+--runRS = do
+--    startPop <- initPop
+--    let startSol = startPop !! 0
+--    y <- f (n * g) [(startSol, 0)]
+--    return $ unzip y
+--    where
+--        f 0 xs = return xs
+--        f i xs@(x:_) = better x >>= \a -> f (i - 1) (a:xs)
+--        better (sol, fit) = do
+--            new <- randomSol
+--            if fitness new > fit then
+--                return (new, fitness new)
+--            else
+--                return (sol, fit)
 
 
-data PopStats =
-    PopStats {
-         psGeneration::Int
-        ,psFitness::Double
-        ,psAvFitness::Double
-        ,psAvSolSize::Double
-        --,psDiversity::Double
-    } deriving Show
+
+runGP :: Solution r t => IO (RunStats (r t))
+runGP = do
+    (endPop, runStats) <- initPop >>= (runWriterT . evolve g)
+    print . head . sortPop $ endPop
+    return runStats
 
 
-type GenStats = [PopStats]
-
-
-getPopStats :: Solution a => Population a -> Int -> PopStats
-getPopStats pop i =
-    PopStats {
-         psGeneration = i
-        ,psFitness = fromIntegral . fitness . topSol $ pop
-        ,psAvFitness = intAverage . map fitness $ pop
-        ,psAvSolSize =intAverage . map sizeSol $ pop
-        --,psDiversity = getDiversity pop
-    }
-
-
-evolve :: Solution a => Int -> Population a -> WriterT GenStats IO (Population a)
-evolve 0 pop = return pop
-evolve i pop = do
-            tell [getPopStats pop (g - i + 1)]
-            lift (nextPop pop) >>= evolve (i - 1)
-
-
-writeStats :: (GenStats, Int) -> IO ()
-writeStats = writeFile "out.txt" . unlines . map show . uncurry every
-
-
-plotFitness :: GenStats -> IO ()
-plotFitness genStats = plot title xlabel ylabel ("../plots/" ++ fname) xs ys
-    where
-        (title, xlabel, ylabel, fname) = ("Fitness", "x", "y", "fitness.png")
-        xs = map ((*n) . psGeneration) genStats
-        ys = map psFitness genStats
-
-
-runGP :: Solution a => Population a -> IO ()
-runGP startPop = do
-    (endPop, genStats) <- (runWriterT . evolve g) startPop
-    writeStats (genStats, 10)
-    print $ topSol endPop
-    plotFitness genStats
+batch :: Solution r t => Int -> IO [RunStats (r t)]
+batch n = forM [0..(n - 1)] (\i -> print i >> runGP)
 
 
 main :: IO ()
 main = do
-    _ <- setStdGen <$> getStdGen
-    startPop <- (initPop :: IO (Population TreeSolution))
-    runGP startPop
+    --_ <- setStdGen <$> getStdGen
+    setStdGen $ mkStdGen 42
+    concatStatsList <- (batch 5 :: IO [RunStats ConcatSolution])
+    plotStats concatStatsList "../plots/concat"
+    treeStatsList <- (batch 5 :: IO [RunStats TreeSolution])
+    plotStats treeStatsList "../plots/tree"
+    --rs <- runRS :: IO ([ConcatSolution], [Double])g

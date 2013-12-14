@@ -1,26 +1,28 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+
+
 module Population where
 
 
 import Common (n, k, randomElem)
 import Solution (Solution, randomSol, cmpSol, mate)
-import Data.List (sortBy)
+import Data.List (sortBy, nub)
 import Control.Monad (replicateM)
-import Data.Set (fromList, size)
 
 
 type Population a = [a]
 
 
-initPop :: Solution a => IO (Population a)
+initPop :: Solution r t => IO (Population (r t))
 initPop = replicateM n randomSol
 
 
-sortPop :: Solution a => Population a -> Population a
+sortPop :: Solution r t => Population (r t) -> Population (r t)
 sortPop = sortBy $ flip cmpSol
 
 
 -- truncation selection
-select :: Solution a => Population a -> IO (Population a)
+select :: Solution r t => Population (r t) -> IO (Population (r t))
 select pop = return $ take k . sortPop $ pop
 
 
@@ -35,7 +37,7 @@ randomPair parents = do
     return (p1, p2)
 
 
-nextPop :: Solution a => Population a -> IO (Population a)
+nextPop :: Solution r t => Population (r t) -> IO (Population (r t))
 nextPop pop = do
     parents <- select pop
     children <- replicateM (n - k) (randomPair parents >>= mate)
@@ -43,5 +45,5 @@ nextPop pop = do
 
 
 -- fraction of unique solutions in pop
---getDiversity :: Population a -> Double
---getDiversity pop = fromIntegral (size $ fromList $ map hashSol pop) / fromIntegral (length pop)
+getDiversity :: Solution r t => Population (r t) -> Double
+getDiversity pop = fromIntegral (length (nub pop)) / fromIntegral (length pop)
