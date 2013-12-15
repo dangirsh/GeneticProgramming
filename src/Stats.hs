@@ -54,7 +54,7 @@ getRange getStat batchStats = (low, av, high)
 
 plotStat :: [RunStats (r t)] -> String -> ((PopStats (r t) -> Double), String) -> IO ()
 plotStat statsList prefix (getStat, statName) =
-    plotErr xs y_ranges (prefix </> statName)
+    plotErr xs y_ranges (prefix </> statName ++ ".png")
     where
         xs = [0,n..g*n]
         y_ranges = map (getRange getStat) $ transpose statsList

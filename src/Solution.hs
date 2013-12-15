@@ -31,11 +31,8 @@ class (Eq (r t), Foldable r, Term t, Show (r t)) => Solution r t | r -> t where
 
     mate :: (r t, r t) -> IO (r t)
     mate (p1, p2) = do
-        r <- random
-        if r < crossover_p then --FIXME
-            crossover p1 p2 >>= mutate
-        else
-            randomSol
+         c <- crossover p1 p2
+         if sizeSol c > (3 * m) then randomSol else return c
 
     sizeSol :: r t -> Int
     sizeSol = foldr (\_ c -> c + 1) 0

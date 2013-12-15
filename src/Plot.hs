@@ -8,7 +8,6 @@ import Data.Colour (opaque)
 import Data.Colour.Names (green)
 import Data.Default.Class (def)
 import Control.Lens ((.~), (^.), _2)
-import Data.Tuple.HT (uncurry3)
 
 
 --data MetaData = MetaData {
