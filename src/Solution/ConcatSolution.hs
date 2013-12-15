@@ -11,6 +11,8 @@ import Term.ConcatTerm
 import Value
 import Operator
 import Control.Monad (replicateM)
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (ask)
 import Data.List (findIndices)
 --import Data.Vector (Vector) -- TODO (swap for list)
 
@@ -20,7 +22,12 @@ type ConcatSolution = [ConcatTerm]
 
 instance Solution [] ConcatTerm where
 
+
     randomSol = replicateM m $ randomElem nonTerminals
+
+    --randomSol = do
+    --    m <- solutionSize . ask
+    --    lift $ replicateM m $ randomElem nonTerminals
 
     evalSol [] (top:_) = Just $ top
     evalSol ((Op f _ _):xs) stack = f stack >>= evalSol xs

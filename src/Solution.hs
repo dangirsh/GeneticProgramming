@@ -9,13 +9,14 @@ import Term
 import Prelude hiding (foldr)
 import Data.Foldable (Foldable, foldr)
 import Foreign.Marshal.Utils (fromBool)
-
+import Control.Monad.Trans.Reader (ReaderT)
 
 type Fitness = Double
 
 
 class (Eq (r t), Foldable r, Term t, Show (r t)) => Solution r t | r -> t where
 
+    --randomSol :: GP (r t)
     randomSol :: IO (r t)
 
     evalSol :: r t -> InputType -> Maybe ValueType

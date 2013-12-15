@@ -4,17 +4,23 @@
 module Population where
 
 
-import Common (n, k, randomElem)
+import Common (n, k, randomElem, GPParams, GP, populationSize)
 import Solution (Solution, randomSol, cmpSol, mate)
+
+
 import Data.List (sortBy, nub)
 import Control.Monad (replicateM)
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (asks)
 
 
 type Population a = [a]
 
 
-initPop :: Solution r t => IO (Population (r t))
-initPop = replicateM n randomSol
+initPop :: Solution r t => GP (Population (r t))
+initPop = do
+    n <- asks populationSize
+    replicateM n (lift randomSol)
 
 
 sortPop :: Solution r t => Population (r t) -> Population (r t)

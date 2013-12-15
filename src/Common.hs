@@ -6,6 +6,7 @@ import Control.Monad (replicateM)
 import Data.List (genericLength)
 import Foreign.Marshal.Utils (fromBool)
 import Control.Applicative
+import Control.Monad.Trans.Reader (ReaderT)
 
 
 --returns a random integer between 0 and i-1, inclusive
@@ -51,6 +52,16 @@ every :: [a] -> Int -> [a]
 every xs i = case drop (i-1) xs of
               (y:ys) -> y : every ys i
               [] -> []
+
+
+data GPParams = GPParams {
+    numGenerations :: Int
+   ,populationSize :: Int
+   ,solutionSize :: Int
+}
+
+
+type GP = ReaderT GPParams IO
 
 
 -- number of generations
