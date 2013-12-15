@@ -4,7 +4,7 @@
 module Population where
 
 
-import Common (n, k, randomElem, GPParams, GP, populationSize)
+import Common (n, k, randomElem, GPParams, GP, populationSize, selectionP)
 import Solution (Solution, randomSol, cmpSol, mate)
 
 
@@ -28,8 +28,8 @@ sortPop = sortBy $ flip cmpSol
 
 
 -- truncation selection
-select :: Solution r t => Population (r t) -> IO (Population (r t))
-select pop = return $ take k . sortPop $ pop
+select :: Solution r t => Int -> Population (r t) -> Population (r t)
+select k = take k . sortPop
 
 
 combine :: Population a -> Population a -> Population a
@@ -43,11 +43,14 @@ randomPair parents = do
     return (p1, p2)
 
 
-nextPop :: Solution r t => Population (r t) -> IO (Population (r t))
+nextPop :: Solution r t => Population (r t) -> GP (Population (r t))
 nextPop pop = do
-    parents <- select pop
-    children <- replicateM (n - k) (randomPair parents >>= mate)
-    return $ combine parents children
+    n <- asks populationSize
+    p <- asks selectionP
+    let k = round $ p * fromIntegral n
+    parents <- lift . return $ select k pop
+    children <- lift $ replicateM (n - k) (randomPair parents >>= mate)
+    lift . return $ combine parents children
 
 
 -- fraction of unique solutions in pop

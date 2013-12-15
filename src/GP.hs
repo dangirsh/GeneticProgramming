@@ -11,11 +11,13 @@ import Control.Monad.Trans (lift)
 
 
 evolve :: Solution r t => Int -> Population (r t) -> WriterT (RunStats (r t)) GP (Population (r t))
-evolve 0 pop = return pop
-evolve i pop = do
-    g <- lift $ asks numGenerations
-    tell [getPopStats pop (g - i + 1)]
-    (lift . lift) (nextPop pop) >>= evolve (i - 1)
+evolve g = f 0
+    where
+        f i pop
+            | i < g  = do
+                tell [getPopStats pop]
+                lift (nextPop pop) >>= f (i + 1)
+            | otherwise = return pop
 
 
 runGP :: Solution r t => GP (RunStats (r t))

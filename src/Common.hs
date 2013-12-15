@@ -5,7 +5,6 @@ import System.Random (randomRIO)
 import Control.Monad (replicateM)
 import Data.List (genericLength)
 import Foreign.Marshal.Utils (fromBool)
-import Control.Applicative
 import Control.Monad.Trans.Reader (ReaderT)
 
 
@@ -58,6 +57,7 @@ data GPParams = GPParams {
     numGenerations :: Int
    ,populationSize :: Int
    ,solutionSize :: Int
+   ,selectionP :: Double
 }
 
 

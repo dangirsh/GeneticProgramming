@@ -25,8 +25,8 @@ type RunStats a = [PopStats a]
 type BatchStats a = [PopStats a]
 
 
-getPopStats :: Solution r t => Population (r t) -> Int -> PopStats (r t)
-getPopStats pop i =
+getPopStats :: Solution r t => Population (r t) -> PopStats (r t)
+getPopStats pop =
     PopStats {
          psFitness = fitness . head . sortPop $ pop
         ,psAvFitness = average . map fitness $ pop

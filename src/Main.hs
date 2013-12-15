@@ -3,8 +3,8 @@
 module Main where
 
 
-import GP (evolve, runGP)
-import Common (GPParams (GPParams))
+import GP (runGP)
+import Common
 import Stats (RunStats, plotStats)
 import Solution (Solution)
 import Solution.TreeSolution (TreeSolution)
@@ -19,7 +19,14 @@ batch :: Solution r t => Int -> IO [RunStats (r t)]
 batch n = forM [0..(n - 1)] (\i -> print i >> (runReaderT runGP $ params))
 
 
-params = GPParams 10 10 10
+params :: GPParams
+params = GPParams {
+    numGenerations = 10
+   ,populationSize = 10
+   ,solutionSize = 10
+   ,selectionP = 0.3
+
+}
 
 
 main :: IO ()
