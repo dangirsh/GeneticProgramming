@@ -10,19 +10,19 @@ import Control.Monad.Trans.Reader (asks)
 import Control.Monad.Trans (lift)
 
 
-evolve :: Solution r t => Int -> Population (r t) -> WriterT (RunStats (r t)) GP (Population (r t))
-evolve g = f 0
+evolve :: Solution r t => WriterT (RunStats (r t)) GP (Population (r t))
+evolve = do
+    g <- lift $ asks numGenerations
+    foldl f (lift initPop) [1..g]
     where
-        f i pop
-            | i < g  = do
-                tell [getPopStats pop]
-                lift (nextPop pop) >>= f (i + 1)
-            | otherwise = return pop
+        f acc generation = do
+            pop <- acc
+            tell [getPopStats pop]
+            lift (nextPop pop)
 
 
 runGP :: Solution r t => GP (RunStats (r t))
 runGP = do
-    g <- asks numGenerations
-    (endPop, runStats) <- initPop >>= runWriterT . evolve g
+    (endPop, runStats) <- runWriterT evolve
     lift . print . head . sortPop $ endPop
     return runStats

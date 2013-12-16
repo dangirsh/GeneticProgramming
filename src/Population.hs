@@ -20,7 +20,7 @@ type Population a = [a]
 initPop :: Solution r t => GP (Population (r t))
 initPop = do
     n <- asks populationSize
-    replicateM n (lift randomSol)
+    replicateM n randomSol
 
 
 sortPop :: Solution r t => Population (r t) -> Population (r t)
@@ -45,11 +45,11 @@ randomPair parents = do
 
 nextPop :: Solution r t => Population (r t) -> GP (Population (r t))
 nextPop pop = do
-    n <- asks populationSize
+    let n = length pop
     p <- asks selectionP
     let k = round $ p * fromIntegral n
     parents <- lift . return $ select k pop
-    children <- lift $ replicateM (n - k) (randomPair parents >>= mate)
+    children <- replicateM (n - k) (lift (randomPair parents) >>= mate)
     lift . return $ combine parents children
 
 

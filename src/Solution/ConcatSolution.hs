@@ -12,7 +12,7 @@ import Value
 import Operator
 import Control.Monad (replicateM)
 import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Reader (ask)
+import Control.Monad.Trans.Reader (asks)
 import Data.List (findIndices)
 --import Data.Vector (Vector) -- TODO (swap for list)
 
@@ -23,11 +23,11 @@ type ConcatSolution = [ConcatTerm]
 instance Solution [] ConcatTerm where
 
 
-    randomSol = replicateM m $ randomElem nonTerminals
+    --randomSol = replicateM m $ randomElem nonTerminals
 
-    --randomSol = do
-    --    m <- solutionSize . ask
-    --    lift $ replicateM m $ randomElem nonTerminals
+    randomSol = do
+        m <- asks solutionSize
+        lift $ replicateM m $ randomElem nonTerminals
 
     evalSol [] (top:_) = Just $ top
     evalSol ((Op f _ _):xs) stack = f stack >>= evalSol xs
@@ -53,7 +53,7 @@ slice (a, b) = take (b - a) . drop a
 
 onePtCrossover sol1 sol2 =
     case sol1 of
-        [] -> randomSol
+        [] -> return sol2
         _  -> do
                 i1 <- randomInt $ length sol1
                 case splits sol1 sol2 i1 of

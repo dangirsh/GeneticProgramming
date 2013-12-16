@@ -9,15 +9,15 @@ import Term
 import Prelude hiding (foldr)
 import Data.Foldable (Foldable, foldr)
 import Foreign.Marshal.Utils (fromBool)
-import Control.Monad.Trans.Reader (ReaderT)
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (ReaderT, asks)
 
 type Fitness = Double
 
 
 class (Eq (r t), Foldable r, Term t, Show (r t)) => Solution r t | r -> t where
 
-    --randomSol :: GP (r t)
-    randomSol :: IO (r t)
+    randomSol :: GP (r t)
 
     evalSol :: r t -> InputType -> Maybe ValueType
 
@@ -30,9 +30,10 @@ class (Eq (r t), Foldable r, Term t, Show (r t)) => Solution r t | r -> t where
         where
             isMatch input = (evalSol sol input) == (Just $ trueSolution input)
 
-    mate :: (r t, r t) -> IO (r t)
+    mate :: (r t, r t) -> GP (r t)
     mate (p1, p2) = do
-         c <- crossover p1 p2
+         c <- lift $ crossover p1 p2
+         m <- asks solutionSize
          if sizeSol c > (3 * m) then randomSol else return c
 
     sizeSol :: r t -> Int

@@ -5,18 +5,34 @@ module Main where
 
 import GP (runGP)
 import Common
-import Stats (RunStats, plotStats)
+import Stats (RunStats)
+import Plot (plotStats)
 import Solution (Solution)
-import Solution.TreeSolution (TreeSolution)
+--import Solution.TreeSolution (TreeSolution)
 import Solution.ConcatSolution (ConcatSolution)
 
 import System.Random (getStdGen, setStdGen, mkStdGen)
 import Control.Monad (forM)
-import Control.Monad.Trans.Reader (runReaderT)
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (runReaderT, local)
 
 
-batch :: Solution r t => Int -> IO [RunStats (r t)]
-batch n = forM [0..(n - 1)] (\i -> print i >> (runReaderT runGP $ params))
+batch :: Solution r t => Int -> GP [RunStats (r t)]
+batch batchSize = forM [1..batchSize] (\i ->
+    lift (print i) >> local (newParams i) runGP)
+
+
+newParams :: Int -> GPParams -> GPParams
+newParams i gpp@(GPParams {populationSize = ps}) =
+    gpp {populationSize = (fromIntegral i) * ps}
+
+
+plotBatch :: Int -> GP ()
+plotBatch batchSize = do
+    concatStatsList <- (batch batchSize :: GP [RunStats ConcatSolution])
+    plotStats concatStatsList "../plots/concat"
+    --treeStatsList <- (batch batchSize :: GP [RunStats TreeSolution])
+    --plotStats treeStatsList "../plots/tree"
 
 
 params :: GPParams
@@ -25,15 +41,12 @@ params = GPParams {
    ,populationSize = 10
    ,solutionSize = 10
    ,selectionP = 0.3
-
 }
 
 
 main :: IO ()
 main = do
-    --gen <- getStdGen
-    setStdGen $ mkStdGen 42 -- gen
-    concatStatsList <- (batch 5 :: IO [RunStats ConcatSolution])
-    plotStats concatStatsList "../plots/concat"
-    treeStatsList <- (batch 5 :: IO [RunStats TreeSolution])
-    plotStats treeStatsList "../plots/tree"
+    --setStdGen $ mkStdGen 42
+    gen <- getStdGen
+    setStdGen gen
+    runReaderT (plotBatch 5) $ params
