@@ -52,34 +52,6 @@ every xs i = case drop (i-1) xs of
               [] -> []
 
 
----- number of generations
---g :: Int
---g = 10
-
----- size of population
---n :: Int
---n = 10
-
----- size of solution
---m :: Int
---m = 10
-
----- fraction to select
---selection_p :: Double
---selection_p = 0.50
-
--- number to select
---k :: Int
---k = round $ (fromIntegral n) * selection_p
-
--- probability of crossover
-crossover_p :: Double
-crossover_p = 0.5
-
--- probability of mutation
-mutation_p :: Double
-mutation_p = 0.2 :: Double
-
 
 type ValueType = Bool
 

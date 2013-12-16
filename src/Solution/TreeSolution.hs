@@ -3,6 +3,7 @@
 module Solution.TreeSolution where
 
 
+import GP
 import Solution
 import Common
 import Tree
@@ -10,8 +11,9 @@ import Term.TreeTerm
 import Operator
 import Value
 import Term
-import Control.Monad (replicateM)
-import Data.Hashable (hash)
+
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (asks)
 
 
 type TreeSolution = Tree TreeTerm
@@ -19,10 +21,12 @@ type TreeSolution = Tree TreeTerm
 
 instance Solution Tree TreeTerm where
 
-    randomSol = randomTree terminals nonTerminals airity depth
+    randomSol = do
+        m <- asks solutionSize
+        lift $ randomTree terminals nonTerminals airity (depth m)
         where
             avBranchNum = intAverage $ map airity (nonTerminals :: [TreeTerm])
-            depth = round $ logBase avBranchNum (fromIntegral m)
+            depth m = round $ logBase avBranchNum (fromIntegral m)
 
 
     evalSol (Node (Terminal (Const x)) _) = return $ Just x
@@ -38,17 +42,13 @@ instance Solution Tree TreeTerm where
 
     crossover sol1 sol2 = do
         node1 <- randomNode sol1
-        case filter (compatible node1) . toNodeList $ sol2 of
+        case filter (nodeCompatible node1) . toNodeList $ sol2 of
             [] -> return sol1
             xs -> do
                     node2 <- randomElem xs
                     return $ swapSubtree node1 node2 sol1
         where
-            compatible (Node x1 xs1) (Node x2 xs2) =
-                case (x1, x2) of
-                    ((Terminal _), (Terminal _)) -> True
-                    ((NonTerminal (Op _ a1 _)), (NonTerminal (Op _ a2 _))) -> a1 == a2
-                    _ -> False
+            nodeCompatible (Node x1 _) (Node x2 _) = compatible x1 x2
 
 
     mutate = return

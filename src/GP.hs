@@ -9,6 +9,8 @@ data GPParams = GPParams {
    ,populationSize :: Int
    ,solutionSize :: Int
    ,selectionP :: Double
+   ,crossoverP :: Double
+   ,mutationP :: Double
 }
 
 

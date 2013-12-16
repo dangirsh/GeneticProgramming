@@ -63,6 +63,7 @@ onePtCrossover sol1 sol2 =
                             i2 <- randomElem xs
                             return $ slice (0, i1) sol1 ++ slice (i2 + 1, length sol2) sol2
 
+
 twoPtCrossover :: ConcatSolution -> ConcatSolution -> IO ConcatSolution
 twoPtCrossover sol1 sol2 = do
     i1A <- randomInt $ length sol1

@@ -4,12 +4,11 @@ module Main where
 
 
 import GP
---import Common
 import Stats (RunStats, getPopStats)
 import Plot (plotStats)
 import Solution (Solution)
 import Population (nextPop, initPop, sortPop)
---import Solution.TreeSolution (TreeSolution)
+import Solution.TreeSolution (TreeSolution)
 import Solution.ConcatSolution (ConcatSolution)
 
 import System.Random (getStdGen, setStdGen)
@@ -42,18 +41,20 @@ plotBatch :: Int -> GPParams -> IO ()
 plotBatch batchSize p = do
     concatStatsList <- (batch batchSize p :: IO [RunStats ConcatSolution])
     plotStats concatStatsList "../plots/concat"
-    --treeStatsList <- (batch batchSize :: IO [RunStats TreeSolution])
-    --plotStats treeStatsList "../plots/tree"
+    treeStatsList <- (batch batchSize p :: IO [RunStats TreeSolution])
+    plotStats treeStatsList "../plots/tree"
 
 
 params :: GPParams
 params = GPParams {
-    numGenerations = 10
-   ,populationSize = 10
-   ,solutionSize = 10
+    numGenerations = 50
+   ,populationSize = 50
+   ,solutionSize = 50
    ,selectionP = 0.3
+   ,crossoverP = 0.9
+   ,mutationP = 0.1
 }
 
 
 main :: IO ()
-main = setStdGen <$> getStdGen >> plotBatch 5 params
+main = setStdGen <$> getStdGen >> plotBatch 3 params
