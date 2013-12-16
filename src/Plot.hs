@@ -8,9 +8,8 @@ import Graphics.Rendering.Chart.Renderable
 import Graphics.Rendering.Chart.Backend.Cairo (renderableToFile)
 import Graphics.Rendering.Chart.Plot.ErrBars (ErrPoint, ErrValue)
 import Data.Default.Class (def)
-import Control.Lens ((.~), (^.))
+import Control.Lens ((.~))
 
-import Control.Monad.Trans (lift)
 import System.FilePath ((</>))
 import Data.List (transpose)
 
@@ -67,20 +66,21 @@ getErr getStat batchStats = ErrValue low av high
         stdErr = stdDev stats / sqrt (fromIntegral batchSize)
 
 
-plotStat :: [RunStats (r t)] -> String -> ((PopStats (r t) -> Double), String) -> GP ()
+plotStat :: [RunStats (r t)] -> String -> ((PopStats (r t) -> Double), String) -> IO ()
 plotStat statsList prefix (getStat, statName) =
-    lift $ plotErr x_errs y_errs (prefix </> statName ++ ".png")
+    plotErr x_errs y_errs (prefix </> statName ++ ".png")
     where
         x_errs = scanl a (ErrValue 0 0 0) $ f psEvaluations
         y_errs = f getStat
         f g = map (getErr g) $ transpose statsList
         a (ErrValue _ la _) (ErrValue tl ta th) = (ErrValue (tl + la) (ta + la) (th + la))
 
-plotStats :: [RunStats (r t)] -> String -> GP ()
-plotStats statsList prefix = mapM_ (plotStat statsList prefix) toPlot
+
+plotStats :: [RunStats (r t)] -> String -> IO ()
+plotStats statsList prefix = mapM_ (plotStat statsList prefix) x
     where
-        toPlot = [(psFitness, "Fitness")
-                 ,(psAvSolSize, "Size")
-                 ,(psDiversity, "Diversity")]
+        x = [(psFitness, "Fitness")
+            ,(psAvSolSize, "Size")
+            ,(psDiversity, "Diversity")]
 
 --main = plot "T" "x" "y" "../plots/out.png" [1,2,3,4] [4,3,2,10]

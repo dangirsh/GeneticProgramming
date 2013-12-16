@@ -1,28 +1,19 @@
 module GP where
 
 
-import Common (GPParams, GP, numGenerations)
-import Stats (RunStats, getPopStats)
-import Solution (Solution)
-import Population (Population, nextPop, initPop, sortPop)
-import Control.Monad.Trans.Writer (WriterT, runWriterT, tell)
-import Control.Monad.Trans.Reader (asks)
-import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Reader (ReaderT, runReaderT)
 
 
-evolve :: Solution r t => WriterT (RunStats (r t)) GP (Population (r t))
-evolve = do
-    g <- lift $ asks numGenerations
-    foldl f (lift initPop) [1..g]
-    where
-        f acc generation = do
-            pop <- acc
-            tell [getPopStats pop]
-            lift (nextPop pop)
+data GPParams = GPParams {
+    numGenerations :: Int
+   ,populationSize :: Int
+   ,solutionSize :: Int
+   ,selectionP :: Double
+}
 
 
-runGP :: Solution r t => GP (RunStats (r t))
-runGP = do
-    (endPop, runStats) <- runWriterT evolve
-    lift . print . head . sortPop $ endPop
-    return runStats
+type GP = ReaderT GPParams IO
+
+
+runGP :: GP a -> GPParams -> IO a
+runGP gp params = runReaderT gp $ params

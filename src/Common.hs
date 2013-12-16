@@ -5,7 +5,6 @@ import System.Random (randomRIO)
 import Control.Monad (replicateM)
 import Data.List (genericLength)
 import Foreign.Marshal.Utils (fromBool)
-import Control.Monad.Trans.Reader (ReaderT)
 
 
 --returns a random integer between 0 and i-1, inclusive
@@ -53,36 +52,25 @@ every xs i = case drop (i-1) xs of
               [] -> []
 
 
-data GPParams = GPParams {
-    numGenerations :: Int
-   ,populationSize :: Int
-   ,solutionSize :: Int
-   ,selectionP :: Double
-}
+---- number of generations
+--g :: Int
+--g = 10
 
+---- size of population
+--n :: Int
+--n = 10
 
-type GP = ReaderT GPParams IO
+---- size of solution
+--m :: Int
+--m = 10
 
-
--- number of generations
-g :: Int
-g = 10
-
--- size of population
-n :: Int
-n = 10
-
--- size of solution
-m :: Int
-m = 10
-
--- fraction to select
-selection_p :: Double
-selection_p = 0.50
+---- fraction to select
+--selection_p :: Double
+--selection_p = 0.50
 
 -- number to select
-k :: Int
-k = round $ (fromIntegral n) * selection_p
+--k :: Int
+--k = round $ (fromIntegral n) * selection_p
 
 -- probability of crossover
 crossover_p :: Double

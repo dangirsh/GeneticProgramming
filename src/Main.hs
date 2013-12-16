@@ -3,35 +3,46 @@
 module Main where
 
 
-import GP (runGP)
-import Common
-import Stats (RunStats)
+import GP
+--import Common
+import Stats (RunStats, getPopStats)
 import Plot (plotStats)
 import Solution (Solution)
+import Population (nextPop, initPop, sortPop)
 --import Solution.TreeSolution (TreeSolution)
 import Solution.ConcatSolution (ConcatSolution)
 
-import System.Random (getStdGen, setStdGen, mkStdGen)
+import System.Random (getStdGen, setStdGen)
+import Control.Applicative ((<$>))
 import Control.Monad (forM)
 import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Reader (runReaderT, local)
+import Control.Monad.Trans.Reader (asks)
+import Control.Monad.Trans.Writer (WriterT, tell, runWriterT)
 
 
-batch :: Solution r t => Int -> GP [RunStats (r t)]
-batch batchSize = forM [1..batchSize] (\i ->
-    lift (print i) >> local (newParams i) runGP)
+evolve :: Solution r t => GP (RunStats (r t))
+evolve = do
+    g <- asks numGenerations
+    (best, stats) <- runWriterT $ foldl f (lift initPop) [1..g]
+    lift . print . head . sortPop $ best
+    return stats
+    where
+        f acc _ = do
+            pop <- acc
+            tell [getPopStats pop]
+            lift (nextPop pop)
 
 
-newParams :: Int -> GPParams -> GPParams
-newParams i gpp@(GPParams {populationSize = ps}) =
-    gpp {populationSize = (fromIntegral i) * ps}
+batch :: Solution r t => Int -> GPParams -> IO [RunStats (r t)]
+batch batchSize p =
+    forM [1..batchSize] (\i -> print i >> runGP evolve p)
 
 
-plotBatch :: Int -> GP ()
-plotBatch batchSize = do
-    concatStatsList <- (batch batchSize :: GP [RunStats ConcatSolution])
+plotBatch :: Int -> GPParams -> IO ()
+plotBatch batchSize p = do
+    concatStatsList <- (batch batchSize p :: IO [RunStats ConcatSolution])
     plotStats concatStatsList "../plots/concat"
-    --treeStatsList <- (batch batchSize :: GP [RunStats TreeSolution])
+    --treeStatsList <- (batch batchSize :: IO [RunStats TreeSolution])
     --plotStats treeStatsList "../plots/tree"
 
 
@@ -45,8 +56,4 @@ params = GPParams {
 
 
 main :: IO ()
-main = do
-    --setStdGen $ mkStdGen 42
-    gen <- getStdGen
-    setStdGen gen
-    runReaderT (plotBatch 5) $ params
+main = setStdGen <$> getStdGen >> plotBatch 5 params

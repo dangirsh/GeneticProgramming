@@ -4,7 +4,8 @@
 module Population where
 
 
-import Common (n, k, randomElem, GPParams, GP, populationSize, selectionP)
+import GP
+import Common (randomElem)
 import Solution (Solution, randomSol, cmpSol, mate)
 
 

@@ -3,14 +3,14 @@
 
 module Solution where
 
-
-import Common
+import GP
+import Common (inputs, trueSolution, InputType, ValueType)
 import Term
 import Prelude hiding (foldr)
 import Data.Foldable (Foldable, foldr)
 import Foreign.Marshal.Utils (fromBool)
 import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Reader (ReaderT, asks)
+import Control.Monad.Trans.Reader (asks)
 
 type Fitness = Double
 

@@ -4,11 +4,11 @@
 module Solution.ConcatSolution where
 
 
-import Common
+import GP
+import Common (randomElem, randomInt, numInputs)
 import Solution
 import Term
 import Term.ConcatTerm
-import Value
 import Operator
 import Control.Monad (replicateM)
 import Control.Monad.Trans (lift)
@@ -51,6 +51,7 @@ slice :: (Int, Int) -> [a] -> [a]
 slice (a, b) = take (b - a) . drop a
 
 
+onePtCrossover :: ConcatSolution -> ConcatSolution -> IO ConcatSolution
 onePtCrossover sol1 sol2 =
     case sol1 of
         [] -> return sol2
@@ -62,7 +63,7 @@ onePtCrossover sol1 sol2 =
                             i2 <- randomElem xs
                             return $ slice (0, i1) sol1 ++ slice (i2 + 1, length sol2) sol2
 
-
+twoPtCrossover :: ConcatSolution -> ConcatSolution -> IO ConcatSolution
 twoPtCrossover sol1 sol2 = do
     i1A <- randomInt $ length sol1
     i1B <- randomInt $ length sol1
