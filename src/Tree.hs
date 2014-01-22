@@ -3,7 +3,6 @@ module Tree where
 
 import Common (random, randomElem)
 import Control.Monad (replicateM)
-import Control.Applicative (pure, (<$>), (<*>))
 import Prelude hiding (foldr, mapM)
 import Data.Foldable (Foldable, foldMap, foldr)
 import Data.Monoid ((<>))
@@ -43,12 +42,12 @@ swapSubtree node newNode this@(Node x xs) =
         Node x $ map (swapSubtree node newNode) xs
 
 
-toList :: Tree a -> [a]
-toList = foldr (:) []
+--toList :: Tree a -> [a]
+--toList = foldr (:) []
 
 
 toNodeList :: Tree a -> [Tree a]
-toNodeList node@(Node x xs) = node : concatMap toNodeList xs
+toNodeList node@(Node _ xs) = node : concatMap toNodeList xs
 
 
 randomNode :: Tree a -> IO (Tree a)

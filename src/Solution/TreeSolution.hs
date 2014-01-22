@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, MultiParamTypeClasses #-}
 
 module Solution.TreeSolution where
 
@@ -12,40 +12,39 @@ import Operator
 import Value
 import Term
 
-import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Reader (asks)
+import Control.Monad.Trans (liftIO)
 
 
-type TreeSolution = Tree TreeTerm
+type TreeSolution a = Tree (TreeTerm a)
 
 
-instance Solution Tree TreeTerm where
+instance (Eq a, Show a) => Solution Tree TreeTerm a where
 
     randomSol = do
-        m <- asks solutionSize
-        lift $ randomTree terminals nonTerminals airity (depth m)
+        m <- getParam solutionSize
+        ts <- terminals
+        nts <- nonTerminals
+        liftIO $ randomTree ts nts airity (toDepth m nts)
         where
-            avBranchNum = intAverage $ map airity (nonTerminals :: [TreeTerm])
-            depth m = round $ logBase avBranchNum (fromIntegral m)
+            avBranchNum nts = intAverage $ map airity nts
+            toDepth m nts = round $ logBase (avBranchNum nts) (fromIntegral m)
 
 
-    evalSol (Node (Terminal (Const x)) _) = return $ Just x
-    evalSol (Node (Terminal (Input n)) _) = do
-        i <- (!!n)
-        return $ Just i
-    evalSol (Node (NonTerminal (Op f a _)) children)
+    evalSol (Node (Terminal (Const x)) _) _ = return $ x
+    evalSol (Node (Terminal (Input n)) _) input = return $ input !! n
+    evalSol (Node (NonTerminal (Op f a _)) children) input
         | a == length children = do
-            outputs <- sequence (map evalSol children)
-            return $ sequence outputs >>= f
+            outputs <- mapM (\c -> evalSol c input) children
+            return $ f outputs
         | otherwise = error "Invalid tree."
 
 
     crossover sol1 sol2 = do
-        node1 <- randomNode sol1
+        node1 <- liftIO . randomNode $ sol1
         case filter (nodeCompatible node1) . toNodeList $ sol2 of
             [] -> return sol1
             xs -> do
-                    node2 <- randomElem xs
+                    node2 <- liftIO . randomElem $ xs
                     return $ swapSubtree node1 node2 sol1
         where
             nodeCompatible (Node x1 _) (Node x2 _) = compatible x1 x2

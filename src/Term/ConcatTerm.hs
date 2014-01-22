@@ -1,30 +1,39 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
 module Term.ConcatTerm where
 
+import GP
 import Term
-import Operator
+import Operator (Op (Op))
 import Value
-import Common
 
 
-type ConcatTerm = Op InputType InputType
+type StackOp a = Op [a] [a]
+
+
+data ConcatTerm a = MkCT (Op [a] [a]) deriving (Eq)
+
+
+instance Show (ConcatTerm a) where
+    show (MkCT (Op _ _ n)) = n
 
 
 instance Term ConcatTerm where
-    compatible (Op _ a1 _) (Op _ a2 _) = a1 == a2
-    terminals = []
-    nonTerminals = map convertConst consts ++ map convertOp ops
-    airity (Op _ a _) = a
 
+    compatible (MkCT (Op _ a1 _)) (MkCT (Op _ a2 _)) = a1 == a2
 
+    terminals = return []
 
-convertConst :: TreeValue -> ConcatTerm
-convertConst (Const x) = Op (Just . (x:)) 0 "const"
-convertConst _ = undefined
+    nonTerminals = do
+        consts <- getReprParam values
+        ops <- getReprParam operators
+        return $ map convertVal consts ++ map convertOp ops
 
+    airity (MkCT (Op _ a _)) = a
 
-convertOp :: TreeOp -> ConcatTerm
-convertOp (Op f a n) = Op g a n
-    where
-        g stack = (f stack) >>= return . (: drop a stack)
+    convertVal (Const x) = MkCT (Op (x:) 0 "const")
+    convertVal _ = undefined
+
+    convertOp (Op f a n) = MkCT (Op g a n)
+        where
+            g stack = f (take a stack) : drop a stack

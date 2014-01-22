@@ -50,22 +50,3 @@ every :: [a] -> Int -> [a]
 every xs i = case drop (i-1) xs of
               (y:ys) -> y : every ys i
               [] -> []
-
-
-
-type ValueType = Bool
-
-
-type InputType = [ValueType]
-
-
-trueSolution :: InputType -> ValueType
-trueSolution = even . sum . map fromBool
-
-
-numInputs :: Int
-numInputs = 6
-
-
-inputs :: [InputType]
-inputs = replicateM numInputs [True, False]

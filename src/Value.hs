@@ -1,21 +1,20 @@
 module Value where
 
-import Common
 
 data Value a = Const a | Input Int deriving (Show, Eq)
 
 
-type TreeValue = Value ValueType
+type BoolValue = Value Bool
 
 
-trueVal :: TreeValue
+trueVal :: BoolValue
 trueVal = Const True
 
 
-falseVal :: TreeValue
+falseVal :: BoolValue
 falseVal = Const False
 
 
-consts :: [TreeValue]
---consts = [trueVal, falseVal]
-consts = []
+vals :: [BoolValue]
+vals = []
+--vals = [trueVal, falseVal]
