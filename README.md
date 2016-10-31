@@ -1,4 +1,6 @@
 GeneticProgramming
 ==================
 
-Testing out GP with concatenative languages.
+A highly-parameterized genetic programming library in Haskell.
+
+Docs in progress.
